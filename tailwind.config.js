@@ -37,7 +37,7 @@ module.exports = {
           "linear-gradient(180deg, #0A2342 0%, #0F172A 100%)",
 
         "gradient-card":
-          "linear-gradient(145deg, #1E3A8A 0%, #0A2342 100%)",
+          "linear-gradient(145deg, #3B82F6 0%, #1E3A8A 100%)",
       },
     },
   },

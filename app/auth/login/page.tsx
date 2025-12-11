@@ -41,7 +41,7 @@ const [showPassword, setShowPassword] = useState({
       return;
      }
       if(savedData.email === form.email && savedData.password === form.password){
-        alert("login successfully");
+        router.push("/dashboard");
       }else{
         setErrors({ general: "incorrect email or password"});
       }
