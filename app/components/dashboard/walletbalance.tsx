@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation"
 
 export default function Walletbalance() {
   const [visible, setVisible] = useState({
     naira: false,
     dollar: false,
   });
-
+const router = useRouter();
   const balances = [
     {
       id: "naira",
@@ -31,7 +32,7 @@ export default function Walletbalance() {
   };
 
   return (
-    <div className="px-6 -mt-8">
+    <div className="px-6 -mt-8 z-50">
       <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-4">
 
         <div className="flex items-center justify-between">
@@ -96,7 +97,9 @@ export default function Walletbalance() {
           </div>
          </div>
          <div className="flex justify-center mt-4">
-          <button className="bg-primary-bright text-white text-xs rounded-lg px-3 py-1 w-full">Add money</button>
+          <button 
+          onClick={() => router.push("/dashboard/addMoney")}
+          className="bg-primary-bright text-white text-xs rounded-lg px-3 py-1 w-full">Add money</button>
           </div>
         </div>
 

@@ -13,6 +13,7 @@ export default function Register() {
     phoneNum: "",
     password: "",
     confirmPassword: "",
+    userName: "",
   });
 const [showPassword, setShowPassword] = useState({
   password: false,
@@ -22,6 +23,7 @@ const [showPassword, setShowPassword] = useState({
   const router = useRouter();
   const fields = [
     { name: "fullname", label: "Full Name", type: "text", placeholder: "Ahmad Isah", icon: User},
+    { name: "userName", label: "Username", type: "text", placeholder: "Guyson", icon: User},
     { name: "email", label: "Email", type: "email", placeholder: "you@example.com", icon: Mail},
     { name: "phoneNum", label: "Phone Number", type: "number", placeholder: "+234 801 234 5678", icon: Phone },
     { name: "password", label: "Password", type: showPassword.password ? "text" : "password" , placeholder: "••••••••", icon: Lock,
@@ -47,7 +49,11 @@ const [showPassword, setShowPassword] = useState({
     if (!form.fullname.trim()) {
       newErrors.fullname = "Full name is required";
     }
-
+    
+    if (!form.userName.trim()) {
+      newErrors.userName = "Username is required";
+    }
+    
     if (!form.email.includes("@")) {
       newErrors.email = "Invalid email format";
     }
@@ -69,7 +75,10 @@ const [showPassword, setShowPassword] = useState({
       alert("Form submitted successfully!");
       const userData = {
         email: form.email,
-        password: form.password
+        password: form.password,
+        fullname: form.fullname,
+        phoneNum: form.phoneNum,
+        username: form.userName,
       };
       localStorage.setItem("user", JSON.stringify(userData));
     router.push("/auth/login");
