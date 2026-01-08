@@ -1,126 +1,167 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Eye,EyeOff,Mail,Lock } from "lucide-react";
-import Image from "next/image";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import Loader from "../../components/ui/loader";
 
+export default function Login() {
+  const router = useRouter();
 
-export default function Register() {
+  const [loading, setLoading] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
-const [showPassword, setShowPassword] = useState({
-  password: false,
-  confirmPassword: false,
-});
-  const [errors, setErrors] = useState({});
-  const router = useRouter();
-  const fields = [
-    { name: "email", label: "Email", type: "email", icon: Mail},
-    { name: "password", label: "Password", type: showPassword.password ? "text" : "password" , icon: Lock,
-      isPassword: true,
-    },
-  ];
 
-  function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+
+  /* ================= AUTO REDIRECT IF LOGGED IN ================= */
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    const user = localStorage.getItem("user");
+
+    if (user && isAuthenticated === "true") {
+      router.replace("/dashboard");
+    }
+  }, [router]);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setForm({ ...form, [e.target.name]: e.target.value });
   }
 
-  function handleSubmit(e) {
+  /* ================= LOGIN FLOW ================= */
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
-    const savedData = JSON.parse(localStorage.getItem ("user"));
-      
-      if(!savedData){
-     setErrors({ general: "No account found" });
-      return;
-     }
-      if(savedData.email === form.email && savedData.password === form.password){
-        router.push("/dashboard");
-      }else{
-        setErrors({ general: "incorrect email or password"});
+    setError("");
+    setLoading(true);
+
+    const storedUser = localStorage.getItem("user");
+
+    setTimeout(() => {
+      if (!storedUser) {
+        setError("No account found. Please register.");
+        setLoading(false);
+        return;
       }
+
+      const user = JSON.parse(storedUser);
+
+      if (user.email === form.email && user.password === form.password) {
+        localStorage.setItem("isAuthenticated", "true");
+
+        // ================= ADD LOGIN NOTIFICATION =================
+        const key = `notifications_${user.email}`;
+        const existing = JSON.parse(localStorage.getItem(key) || "[]");
+
+        const newNotification = {
+          id: Date.now(),
+          title: "Login Successful",
+          message: "You logged in successfully",
+          read: false,
+        };
+
+        localStorage.setItem(
+          key,
+          JSON.stringify([newNotification, ...existing])
+        );
+
+        // ================= REDIRECT =================
+        setRedirecting(true);
+
+        setTimeout(() => {
+          router.replace("/dashboard");
+        }, 900);
+      } else {
+        setError("Incorrect email or password");
+        setLoading(false);
+      }
+    }, 1000);
   }
+
   return (
-    <form onSubmit={handleSubmit} className="p-5 flex items-center justify-center min-h-screen bg-gradient-primary-dark">
-      <div className="w-full max-w-md">
-      <div className="rounded-3xl shadow-2xl border border-white/20 p-8 bg-white">
-        <div className="text-center mb-8">
-          <div className="flex justify-center pb-4">
-          <img 
-          src="/logo.svg"
-          width={40}
-          height={40}
-          alt="logo"
-          className="rounded-full shadow-lg"
-          />
-          </div>
-      <h1 className="text-green-500 text-3xl font-semibold bg-gradient-primary-dark bg-clip-text text-transparent">Welcome 👋</h1>
-      </div>
-      <div className="space-y-6">
-      {fields.map((field) => (
-        <div key={field.name} className="relative">
-          <field.icon className="absolute left-4 top-5 h-5 w-5 text-gray-400" />
-          <input
-            name={field.name}
-            type={field.type}
-            placeholder={field.placeholder}
-            value={form[field.name]}
-            onChange={handleChange}
-            className="pl-12 border bg-gray-50 rounded-2xl focus:outline-none w-full pr-4 py-4 border-gray-200 focus:ring-1 focus:ring-primary-bright focus-bg-white transition-all duration-300 placeholder-gray-400"
-          />
-       {field.isPassword && (
-      <button
-        type="button"
-        onClick={() =>
-          setShowPassword((prev) => ({
-            ...prev,
-            [field.name]: !prev[field.name],
-          }))
-        }
-        className="absolute right-4 top-5 text-gray-700 hover:text-gray-700 transition"
+    <>
+      {/* ================= REDIRECT LOADER ================= */}
+      {redirecting && <Loader />}
+
+      <form
+        onSubmit={handleSubmit}
+        className="min-h-screen flex items-center justify-center bg-gradient-primary-dark px-5"
       >
-        {showPassword[field.name] ? (
-          <EyeOff className="h-5 w-5" />
-        ) : (
-          <Eye className="h-5 w-5" />
-        )}
-      </button>
-    )}
-   <label className="absolute -top-3 left-10 bg-white px-2 text-sm font-medium text-gray-600">{field.label}:</label>
-        </div>
-      ))}
-        {errors.general && (
-            <p className="text-red-500 text-sm">{errors.general}</p>
-          )}
-      </div>
-       <div className="mt-4 flex gap-3 justify-center">
-      <input 
-      type="checkbox"
-      />
-      <label className="text-sm ">Remember me</label>
-      <Link href="/auth/forgotPass" className="text-primary-light hover:underline text-right text-sm">Forget password?</Link>
-      </div>
-     <button
-     type="submit"
-     className="w-full py-4 bg-gradient-primary-dark shadow-lg rounded-2xl mt-4 hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300 text-white"
-     >Log in</button>
-         <p className="text-center text-sm text-gray-600 mt-6">
-            Already have an account?{" "}
-            <Link href="/auth/register" className="text-primary-light font-semibold hover:underline">
+        <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8">
+          <h1 className="text-center text-3xl font-semibold mb-6 bg-gradient-primary-dark text-transparent bg-clip-text">
+            Welcome Back 👋
+          </h1>
+
+          {/* ================= EMAIL ================= */}
+          <div className="relative mb-4">
+            <Mail className="absolute left-4 top-4 text-gray-400" />
+            <input
+              name="email"
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              disabled={loading || redirecting}
+              className="pl-12 w-full py-3 rounded-xl border focus:ring-1 focus:ring-primary-bright disabled:opacity-60"
+            />
+          </div>
+
+          {/* ================= PASSWORD ================= */}
+          <div className="relative mb-4">
+            <Lock className="absolute left-4 top-4 text-gray-400" />
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              disabled={loading || redirecting}
+              className="pl-12 pr-12 w-full py-3 rounded-xl border focus:ring-1 focus:ring-primary-bright disabled:opacity-60"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-4 text-gray-500"
+              disabled={loading || redirecting}
+            >
+              {showPassword ? <EyeOff /> : <Eye />}
+            </button>
+          </div>
+
+          {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+
+          {/* ================= BUTTON ================= */}
+          <button
+            type="submit"
+            disabled={loading || redirecting}
+            className="w-full h-12 bg-gradient-primary-dark text-white rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
+          </button>
+
+          {/* ================= SIGN UP ================= */}
+          <p className="text-center text-sm mt-4">
+            Don’t have an account?{" "}
+            <Link
+              href="/auth/register"
+              className="text-primary-light font-semibold"
+            >
               Sign up
             </Link>
           </p>
-      </div>
-      <div className="text-center mt-6">
-          <p className="text-xs text-neutral-soft">© 2025 O-wallet. All rights reserved.</p>
         </div>
-      </div>
-    </form>
+      </form>
+    </>
   );
 }

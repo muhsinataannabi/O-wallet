@@ -8,7 +8,7 @@ export default function AccountInfo({
   username,
 }: AccountInformationProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm">
+    <div className="bg-white rounded-2xl shadow-sm p-4">
       
       <h3 className="text-lg font-semibold mb-4">Account Information</h3>
       <div className="space-y-4">

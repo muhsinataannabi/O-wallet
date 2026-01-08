@@ -1,3 +1,5 @@
+import { adminTransactions } from "./data/adminTran";
+
 type Transaction = {
   id: number;
   user: string;

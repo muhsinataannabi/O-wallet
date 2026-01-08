@@ -42,4 +42,13 @@ a {
   html {
     color-scheme: dark;
   }
+  html {
+  scroll-behavior: smooth;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
 }

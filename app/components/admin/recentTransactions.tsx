@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Transaction } from "./data/adminTran";
 
 type Transaction = {
   id: number;
